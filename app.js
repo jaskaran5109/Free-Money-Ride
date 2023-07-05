@@ -4,6 +4,7 @@ const userRoutes = require("./routes/userRoutes");
 const offerRoutes = require("./routes/offerRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const payoutRoutes = require("./routes/payoutRoutes");
+const pushbackRoutes = require("./routes/pushbackRoutes");
 const userTransactionRoutes = require("./routes/userTransactionRoutes");
 const cors = require("cors");
 const Razorpay = require("razorpay");
@@ -34,6 +35,7 @@ app.use("/api", userRoutes);
 app.use("/api", offerRoutes);
 app.use("/api", userTransactionRoutes);
 app.use("/api", payoutRoutes);
+app.use("/api", pushbackRoutes);
 app.use("/api/admin", adminRoutes);
 
 // Start the server
