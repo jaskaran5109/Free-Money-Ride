@@ -6,6 +6,11 @@ const userTransactionSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  offerId:{
+    type: mongoose.Schema.ObjectId,
+    ref: "Offer",
+    required: true,
+  },
   amount: {
     type: Number,
     required: true,

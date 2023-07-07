@@ -4,10 +4,11 @@ const UserTransaction = require("../models/UserTransaction");
 // Create a new user transaction
 const createUserTransaction = catchAsyncError(async (req, res) => {
   try {
-    const { userId, amount, currency, description } = req.body;
+    const { userId,offerId, amount, currency, description } = req.body;
 
     const earning = new UserTransaction({
       userId,
+      offerId,
       amount,
       currency,
       description,
