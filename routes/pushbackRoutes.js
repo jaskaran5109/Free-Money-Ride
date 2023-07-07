@@ -4,6 +4,6 @@ const pushbackController = require("../controllers/PushbackController");
 const { isAppAuthenticated } = require("../middlewares/auth");
 
 // Route for getting report of User througt offer ID
-router.get("/pushBackReport",isAppAuthenticated,pushbackController.getReports);
+router.post("/pushBackReport",isAppAuthenticated,pushbackController.getReports);
 
 module.exports = router;
