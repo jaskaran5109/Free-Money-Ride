@@ -6,18 +6,18 @@ const catchAsyncError = require("../middlewares/catchAsyncError");
 
 const { sendAppToken } = require("../services/sendToken");
 
-exports.register = catchAsyncError(async (req, res) => {
+exports.register = catchAsyncError(async (req, res,next) => {
   const { name, email,password, phoneNumber, gender, dateOfBirth } = req.body;
 
   // Check if user already exists
 
   if (!name || !email || !password || !phoneNumber || !gender || !dateOfBirth) {
-    return next(new ErrorHandler("Please enter a All fields", 400));
+    return res.status(400).json({ error: "Please enter all fields" });
   }
 
-  const existingUser = await User.findOne({ email, phoneNumber });
+  const existingUser = await User.findOne({ phoneNumber });
   if (existingUser) {
-    return next(new ErrorHandler("User already exists", 400));
+    return res.status(409).json({ error: "User already exists" });
   }
 
   // Create a new user
