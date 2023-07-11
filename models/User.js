@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -13,6 +14,12 @@ const UserSchema = new mongoose.Schema({
     required: [true, "Please enter your email"],
     unique: true,
     validate: validator.isEmail,
+  },
+  password: {
+    type: String,
+    required: [true, "Please enter your password"],
+    minLength: [6, "Password must be at least 6 characters"],
+    select: false,
   },
   phoneNumber: {
     type: String,
@@ -73,6 +80,18 @@ UserSchema.methods.getJWTAppToken = function () {
   });
 };
 
+
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+UserSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
 const User = mongoose.model("User", UserSchema);
 
 module.exports = User;

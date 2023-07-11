@@ -7,11 +7,11 @@ const catchAsyncError = require("../middlewares/catchAsyncError");
 const { sendAppToken } = require("../services/sendToken");
 
 exports.register = catchAsyncError(async (req, res) => {
-  const { name, email, phoneNumber, gender, dateOfBirth } = req.body;
+  const { name, email,password, phoneNumber, gender, dateOfBirth } = req.body;
 
   // Check if user already exists
 
-  if (!name || !email || !phoneNumber || !gender || !dateOfBirth) {
+  if (!name || !email || !password || !phoneNumber || !gender || !dateOfBirth) {
     return next(new ErrorHandler("Please enter a All fields", 400));
   }
 
@@ -21,7 +21,7 @@ exports.register = catchAsyncError(async (req, res) => {
   }
 
   // Create a new user
-  const user = new User({ name, email, phoneNumber, gender, dateOfBirth });
+  const user = new User({ name, email,password, phoneNumber, gender, dateOfBirth });
 
   const razorpayContact = await axios.post(
     "https://api.razorpay.com/v1/contacts",
@@ -49,12 +49,21 @@ exports.register = catchAsyncError(async (req, res) => {
 });
 
 exports.login = catchAsyncError(async (req, res) => {
-  const { email, phoneNumber } = req.body;
+  const { phoneNumber, password } = req.body;
 
-  const user = await User.findOne({ email, phoneNumber });
-  if (!user) {
-    return res.status(400).json({ error: "User doesn't exists" });
-  }
+  if (!phoneNumber || !password)
+    return res.status(400).json({ error: "Please enter all fields" });
+
+  const user = await User.findOne({ phoneNumber }).select("+password");
+
+  if (!user)
+    return res.status(401).json({ error: "Incorrect phoneNumber or Password" });
+
+  const isMatch = await user.comparePassword(password);
+
+  if (!isMatch)
+    return res.status(401).json({ error: "Incorrect phoneNumber or Password" });
+    
   sendAppToken(res, user, `Welcome back, ${user.name}`, 200);
 });
 
