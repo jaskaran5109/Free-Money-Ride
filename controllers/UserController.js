@@ -61,7 +61,7 @@ try {
   const isMatch = await user.comparePassword(password);
 
   if (!isMatch)
-    return res.status(200).json({success:false, error: "Incorrect Password" });
+    return res.status(401).json({success:false, error: "Incorrect Password" });
     
   sendAppToken(res, user, `Welcome back, ${user.name}`, 200);
 
