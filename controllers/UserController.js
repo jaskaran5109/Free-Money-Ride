@@ -49,21 +49,25 @@ exports.register = async (req, res,next) => {
 
 exports.login = async (req, res) => {
   const { phoneNumber, password } = req.body;
-
+try {
   if (!phoneNumber || !password)
     return res.status(400).json({ error: "Please enter all fields" });
 
   const user = await User.findOne({ phoneNumber }).select("+password");
 
   if (!user)
-    return res.status(401).json({ error: "Incorrect phoneNumber or Password" });
+    return res.status(401).json({success:false, error: "User not found! Please Register" });
 
   const isMatch = await user.comparePassword(password);
 
   if (!isMatch)
-    return res.status(401).json({ error: "Incorrect phoneNumber or Password" });
+    return res.status(401).json({success:false, error: "Incorrect phoneNumber or Password" });
     
   sendAppToken(res, user, `Welcome back, ${user.name}`, 200);
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
 };
 
 exports.phoneCheck = async (req, res) => {
