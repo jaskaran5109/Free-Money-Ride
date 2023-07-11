@@ -5,7 +5,7 @@ const catchAsyncError = require("../middlewares/catchAsyncError");
 
 const { sendAppToken } = require("../services/sendToken");
 
-exports.register = catchAsyncError(async (req, res,next) => {
+exports.register = async (req, res,next) => {
   const { name, email,password, phoneNumber, gender, dateOfBirth } = req.body;
 
   // Check if user already exists
@@ -45,9 +45,9 @@ exports.register = catchAsyncError(async (req, res,next) => {
 
   // Send the response
   sendAppToken(res, user, "Registered Successfully", 201);
-});
+};
 
-exports.login = catchAsyncError(async (req, res) => {
+exports.login = async (req, res) => {
   const { phoneNumber, password } = req.body;
 
   if (!phoneNumber || !password)
@@ -64,7 +64,7 @@ exports.login = catchAsyncError(async (req, res) => {
     return res.status(401).json({ error: "Incorrect phoneNumber or Password" });
     
   sendAppToken(res, user, `Welcome back, ${user.name}`, 200);
-});
+};
 
 exports.phoneCheck = async (req, res) => {
   const { phoneNumber } = req.body;
