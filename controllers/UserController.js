@@ -1,13 +1,13 @@
 const User = require("../models/User");
 const base64 = require("base-64");
 const axios = require("axios");
-const crypto = require('crypto');
+const crypto = require("crypto");
 const { sendEmail } = require("../services/sendEmail");
 const catchAsyncError = require("../middlewares/catchAsyncError");
 
 const { sendAppToken } = require("../services/sendToken");
 
-exports.register = catchAsyncError(async (req, res, next) => {
+exports.register = async (req, res, next) => {
   const { name, email, password, phoneNumber, gender, dateOfBirth } = req.body;
 
   // Check if user already exists
@@ -54,26 +54,33 @@ exports.register = catchAsyncError(async (req, res, next) => {
 
   // Send the response
   sendAppToken(res, user, "Registered Successfully", 201);
-});
+};
 
-exports.login = catchAsyncError(async (req, res) => {
+exports.login = async (req, res) => {
   const { phoneNumber, password } = req.body;
+  try {
+    if (!phoneNumber || !password)
+      return res.status(400).json({ error: "Please enter all fields" });
 
-  if (!phoneNumber || !password)
-    return res.status(400).json({ error: "Please enter all fields" });
+    const user = await User.findOne({ phoneNumber }).select("+password");
 
-  const user = await User.findOne({ phoneNumber }).select("+password");
+    if (!user)
+      return res
+        .status(401)
+        .json({ success: false, error: "User not found! Please Register" });
 
-  if (!user)
-    return res.status(401).json({ error: "Incorrect phoneNumber or Password" });
+    const isMatch = await user.comparePassword(password);
 
-  const isMatch = await user.comparePassword(password);
+    if (!isMatch)
+      return res
+        .status(401)
+        .json({ success: false, error: "Incorrect Password" });
 
-  if (!isMatch)
-    return res.status(401).json({ error: "Incorrect phoneNumber or Password" });
-
-  sendAppToken(res, user, `Welcome back, ${user.name}`, 200);
-});
+    sendAppToken(res, user, `Welcome back, ${user.name}`, 200);
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
 
 exports.phoneCheck = async (req, res) => {
   const { phoneNumber } = req.body;
@@ -307,9 +314,9 @@ exports.forgetPassword = catchAsyncError(async (req, res, next) => {
 exports.resetPassword = catchAsyncError(async (req, res, next) => {
   const { token } = req.params;
   const resetPasswordToken = crypto
-  .createHash('sha256')
-  .update(token)
-  .digest('hex');
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
   const user = await User.findOne({
     resetPasswordToken,
     resetPasswordExpire: {
@@ -317,7 +324,9 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
     },
   });
   if (!user) {
-    return res.status(404).json({ error: "Token is invalid or has been expires" });
+    return res
+      .status(404)
+      .json({ error: "Token is invalid or has been expires" });
   }
   user.password = req.body.password;
   user.resetPasswordExpire = undefined;
