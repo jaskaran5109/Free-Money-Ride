@@ -1,12 +1,14 @@
 const User = require("../models/User");
 const base64 = require("base-64");
 const axios = require("axios");
+const crypto = require('crypto');
+const { sendEmail } = require("../services/sendEmail");
 const catchAsyncError = require("../middlewares/catchAsyncError");
 
 const { sendAppToken } = require("../services/sendToken");
 
-exports.register = catchAsyncError(async (req, res,next) => {
-  const { name, email,password, phoneNumber, gender, dateOfBirth } = req.body;
+exports.register = catchAsyncError(async (req, res, next) => {
+  const { name, email, password, phoneNumber, gender, dateOfBirth } = req.body;
 
   // Check if user already exists
 
@@ -20,7 +22,14 @@ exports.register = catchAsyncError(async (req, res,next) => {
   }
 
   // Create a new user
-  const user = new User({ name, email,password, phoneNumber, gender, dateOfBirth });
+  const user = new User({
+    name,
+    email,
+    password,
+    phoneNumber,
+    gender,
+    dateOfBirth,
+  });
 
   const razorpayContact = await axios.post(
     "https://api.razorpay.com/v1/contacts",
@@ -62,7 +71,7 @@ exports.login = catchAsyncError(async (req, res) => {
 
   if (!isMatch)
     return res.status(401).json({ error: "Incorrect phoneNumber or Password" });
-    
+
   sendAppToken(res, user, `Welcome back, ${user.name}`, 200);
 });
 
@@ -273,4 +282,52 @@ exports.updatePayoutStatus = catchAsyncError(async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to update Payout status" });
   }
+});
+
+exports.forgetPassword = catchAsyncError(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+  const resetToken = await user.getResetToken();
+
+  await user.save();
+
+  const url = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
+  const message = `Click on the link to reset your password. ${url}. if you have not requested then please ignore`;
+  await sendEmail(user.email, `FreeMoneyRide App Reset Password`, message);
+
+  res.status(200).json({
+    success: true,
+    message: `Reset Token has been sent to ${email}`,
+  });
+});
+
+exports.resetPassword = catchAsyncError(async (req, res, next) => {
+  const { token } = req.params;
+  const resetPasswordToken = crypto
+  .createHash('sha256')
+  .update(token)
+  .digest('hex');
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: {
+      $gt: Date.now(),
+    },
+  });
+  if (!user) {
+    return res.status(404).json({ error: "Token is invalid or has been expires" });
+  }
+  user.password = req.body.password;
+  user.resetPasswordExpire = undefined;
+  user.resetPasswordToken = undefined;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Password changed successfully",
+    user,
+  });
 });

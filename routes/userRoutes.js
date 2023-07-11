@@ -38,4 +38,8 @@ router.put(
   userController.updatePayoutStatus
 );
 
+
+router.post("/forgetpassword",userController.forgetPassword);
+router.put("/admin/resetpassword/:token",userController.resetPassword);
+
 module.exports = router;
