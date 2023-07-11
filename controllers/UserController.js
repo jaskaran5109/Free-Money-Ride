@@ -1,7 +1,6 @@
 const User = require("../models/User");
 const base64 = require("base-64");
 const axios = require("axios");
-const ErrorHandler = require("../services/errorHandler.js");
 const catchAsyncError = require("../middlewares/catchAsyncError");
 
 const { sendAppToken } = require("../services/sendToken");
@@ -114,7 +113,7 @@ exports.getAllUsers = catchAsyncError(async (req, res) => {
 exports.deleteUserById = catchAsyncError(async (req, res) => {
   const user = await User.findByIdAndRemove(req.params.id);
   if (!user) {
-    return next(new ErrorHandler("User not found", 404));
+    return res.status(404).json({ error: "User not found" });
   }
   res.status(200).json({ success: true, message: "User deleted successfully" });
 });
@@ -123,7 +122,7 @@ exports.updateUserWallet = catchAsyncError(async (req, res) => {
   const { userId, amount } = req.body;
   const user = await User.findById(userId);
   if (!user) {
-    return next(new ErrorHandler("User not found", 404));
+    return res.status(404).json({ error: "User not found" });
   }
 
   user.wallet.amount += amount;
@@ -140,7 +139,7 @@ exports.addRazorPayFundId = catchAsyncError(async (req, res) => {
   // Find the user by their ID
   const user = await User.findById(userId);
   if (!user) {
-    return next(new ErrorHandler("User not found", 404));
+    return res.status(404).json({ error: "User not found" });
   }
   try {
     // await user.save();
@@ -173,7 +172,7 @@ exports.addRazorPayFundId = catchAsyncError(async (req, res) => {
       user: user,
     });
   } catch (error) {
-    next(new ErrorHandler("Failed to add Fund ID", 500));
+    res.status(500).json({ error: "Failed to add Fund ID" });
   }
 });
 
@@ -182,7 +181,7 @@ exports.createPayout = catchAsyncError(async (req, res) => {
   // Find the user by their ID
   const user = await User.findById(userId);
   if (!user) {
-    return next(new ErrorHandler("User not found", 404));
+    return res.status(404).json({ error: "User not found" });
   }
   try {
     // await user.save();
@@ -234,7 +233,7 @@ exports.createPayout = catchAsyncError(async (req, res) => {
       user: user,
     });
   } catch (error) {
-    next(new ErrorHandler("Failed to create Payout ID", 500));
+    res.status(500).json({ error: "Failed to create Payout ID" });
   }
 });
 
@@ -243,7 +242,7 @@ exports.updatePayoutStatus = catchAsyncError(async (req, res) => {
   // Find the user by their ID
   const user = await User.findById(userId);
   if (!user) {
-    return next(new ErrorHandler("User not found", 404));
+    return res.status(404).json({ error: "User not found" });
   }
   try {
     const razorpayPayoutId = await axios.get(
@@ -272,6 +271,6 @@ exports.updatePayoutStatus = catchAsyncError(async (req, res) => {
       user: user,
     });
   } catch (error) {
-    next(new ErrorHandler("Failed to update Payout status", 500));
+    res.status(500).json({ error: "Failed to update Payout status" });
   }
 });
