@@ -7,8 +7,7 @@ const userTransactionSchema = new mongoose.Schema({
     required: true,
   },
   offerId:{
-    type: mongoose.Schema.ObjectId,
-    ref: "Offer",
+    type: String,
     required: true,
   },
   amount: {
