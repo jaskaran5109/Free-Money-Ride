@@ -301,7 +301,7 @@ exports.forgetPassword = catchAsyncError(async (req, res, next) => {
 
   await user.save();
 
-  const url = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
+  const url = `${process.env.FRONTEND_URL}/#/resetpassword/${resetToken}`;
   const message = `Click on the link to reset your password. ${url}. if you have not requested then please ignore`;
   await sendEmail(user.email, `FreeMoneyRide App Reset Password`, message);
 
