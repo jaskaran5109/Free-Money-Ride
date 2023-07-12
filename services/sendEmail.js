@@ -13,7 +13,7 @@ exports.sendEmail = async (to, subject, text) => {
   });
 
   const mailOptions = {
-    from: "Jaskaran <js1462@srmist.edu.in>", // Sender's name and email address
+    from: "FreeMoneyRide <js1462@srmist.edu.in>", // Sender's name and email address
     to: to, // Recipient's email address
     subject: subject, // Email subject
     text: text, // Email body
