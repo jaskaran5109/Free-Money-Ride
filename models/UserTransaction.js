@@ -9,6 +9,7 @@ const userTransactionSchema = new mongoose.Schema({
   offerId:{
     type: String,
     required: true,
+    unique: true,
   },
   amount: {
     type: Number,

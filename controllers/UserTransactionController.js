@@ -6,6 +6,11 @@ const createUserTransaction = catchAsyncError(async (req, res) => {
   try {
     const { userId,offerId, amount, currency, description } = req.body;
 
+
+    const existingOfferId=await UserTransaction.findOne({offerId});
+    if(existingOfferId){
+      return res.status(201).json({});
+    }
     const earning = new UserTransaction({
       userId,
       offerId,
