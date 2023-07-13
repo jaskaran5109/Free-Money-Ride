@@ -9,7 +9,6 @@ const userTransactionSchema = new mongoose.Schema({
   offerId:{
     type: String,
     required: true,
-    unique: true,
   },
   amount: {
     type: Number,
@@ -29,6 +28,9 @@ const userTransactionSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+
+userTransactionSchema.index({ userId: 1, offerId: 1 }, { unique: true });
 
 const UserTransaction = mongoose.model(
   "UserTransaction",

@@ -6,7 +6,7 @@ const UserTransaction = require("../models/UserTransaction");
 const createUserTransaction = async (req, res) => {
   const { userId, offerId, amount, currency, description } = req.body;
 
-  const existingOffer = await UserTransaction.findOne({ offerId });
+  const existingOffer = await UserTransaction.findOne({ offerId:offerId,userId:userId });
   const user = await User.findById(userId);
   if (existingOffer) {
     return res.status(200).json({});
