@@ -15,4 +15,8 @@ router.post(
   userTransactionController.getSingleUserTransactionById
 );
 
+router.get("/all-user-earnings",userTransactionController.getAllUsersEarnings)
+router.post("/all-user-earnings-for-todays-day",userTransactionController.findTotalEarningsByDate)
+router.get("/all-user-amount-left",userTransactionController.findTotalUsersAmountLeft)
+
 module.exports = router;
