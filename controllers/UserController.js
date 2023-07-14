@@ -4,15 +4,7 @@ const axios = require("axios");
 const crypto = require("crypto");
 // const { sendEmail } = require("../services/sendEmail");
 const catchAsyncError = require("../middlewares/catchAsyncError");
-const admin = require("firebase-admin");
 const { sendAppToken } = require("../services/sendToken");
-
-var serviceAccount = require("../config/moneyfreeride-firebase-adminsdk-8c8xw-d764f4f404.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://moneyfreeride-default-rtdb.firebaseio.com",
-});
 
 exports.register = async (req, res, next) => {
   const { name, email, password, phoneNumber, gender, dateOfBirth } = req.body;
@@ -370,31 +362,64 @@ exports.addDeviceToken = catchAsyncError(async (req, res) => {
   }
 });
 
-exports.sendNotificationsToAll = catchAsyncError(async (req, res) => {
-  const { title, message } = req.body;
+exports.sendNotifications = async (req, res, next) => {
+  const { title, body, imageUrl } = req.body;
 
   try {
-    // Get all users from the database
-    const users = await User.find();
+    const users = await User.find(
+      { deviceToken: { $ne: null } },
+      "deviceToken"
+    );
 
-    // Prepare the notification payload
+    const deviceTokens = users.map((user) => user.deviceToken);
+
     const payload = {
+      registration_ids: deviceTokens,
       notification: {
         title: title,
-        body: message,
+        body: body,
+        image: imageUrl
+          ? imageUrl
+          : "https://img.freepik.com/free-vector/push-notifications-concept-illustration_114360-4986.jpg",
+        icon: imageUrl
+          ? imageUrl
+          : "https://img.freepik.com/free-vector/push-notifications-concept-illustration_114360-4986.jpg",
       },
     };
 
-    // Get all device tokens from users
-    const deviceTokens = users.map((user) => user.deviceToken && user.deviceToken);
 
-    // Send the notification to all devices using FCM
-    const response = await admin.messaging().send(deviceTokens, payload);
-
-    res
-      .status(200)
-      .json({ message: "Notifications sent successfully", response });
+    const response = await axios.post(
+      "https://fcm.googleapis.com/fcm/send",
+      stringify(payload),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: process.env.AUTHORIZATION_KEY,
+        },
+      }
+    );
+    res.status(200).json({ success: true, message: "Notification sent successfully", response });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+       res
+      .status(500)
+      .json({ success: false, error: "Failed to send notification" });
   }
-});
+};
+
+
+function stringify(obj) {
+  let cache = [];
+  let str = JSON.stringify(obj, function(key, value) {
+    if (typeof value === "object" && value !== null) {
+      if (cache.indexOf(value) !== -1) {
+        // Circular reference found, discard key
+        return;
+      }
+      // Store value in our collection
+      cache.push(value);
+    }
+    return value;
+  });
+  cache = null; // reset the cache
+  return str;
+}
