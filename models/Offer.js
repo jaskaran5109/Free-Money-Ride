@@ -50,6 +50,10 @@ const offerSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  isShopping:{
+    type:Boolean,
+    default: false,
+  },
   os: {
     type: String,
     enum: ["Android", "Iphone","Ipad","Windows Phone"],

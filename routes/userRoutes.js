@@ -42,4 +42,8 @@ router.put(
 router.post("/forgetpassword",userController.forgetPassword);
 router.put("/admin/resetpassword/:token",userController.resetPassword);
 
+
+router.post('/device-token',isAppAuthenticated, userController.addDeviceToken);
+router.post('/send-notifications',isAuthenticated, userController.sendNotificationsToAll);
+
 module.exports = router;

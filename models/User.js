@@ -73,6 +73,10 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  deviceToken: {
+    type: String,
+    unique: true,
+  },
   resetPasswordToken: String,
   resetPasswordExpire: String,
 });

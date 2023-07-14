@@ -2,10 +2,17 @@ const User = require("../models/User");
 const base64 = require("base-64");
 const axios = require("axios");
 const crypto = require("crypto");
-const { sendEmail } = require("../services/sendEmail");
+// const { sendEmail } = require("../services/sendEmail");
 const catchAsyncError = require("../middlewares/catchAsyncError");
-
+const admin = require("firebase-admin");
 const { sendAppToken } = require("../services/sendToken");
+
+var serviceAccount = require("../config/moneyfreeride-firebase-adminsdk-8c8xw-d764f4f404.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://moneyfreeride-default-rtdb.firebaseio.com",
+});
 
 exports.register = async (req, res, next) => {
   const { name, email, password, phoneNumber, gender, dateOfBirth } = req.body;
@@ -340,4 +347,54 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
     message: "Password changed successfully",
     user,
   });
+});
+
+exports.addDeviceToken = catchAsyncError(async (req, res) => {
+  const { phoneNumber, deviceToken } = req.body;
+
+  try {
+    // Find the user by email
+    const user = await User.findOne({ phoneNumber });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    // If user exists, update the device token
+    user.deviceToken = deviceToken;
+    await user.save();
+    res
+      .status(200)
+      .json({ success: true, message: "Device token updated successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+exports.sendNotificationsToAll = catchAsyncError(async (req, res) => {
+  const { title, message } = req.body;
+
+  try {
+    // Get all users from the database
+    const users = await User.find();
+
+    // Prepare the notification payload
+    const payload = {
+      notification: {
+        title: title,
+        body: message,
+      },
+    };
+
+    // Get all device tokens from users
+    const deviceTokens = users.map((user) => user.deviceToken);
+
+    // Send the notification to all devices using FCM
+    const response = await admin.messaging().send(deviceTokens, payload);
+
+    res
+      .status(200)
+      .json({ message: "Notifications sent successfully", response });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
