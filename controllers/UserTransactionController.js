@@ -123,11 +123,14 @@ const findTotalEarningsByDate = async (req, res) => {
     // Check if any results are returned
     if (result.length > 0) {
       const totalEarnings = result[0].totalEarnings;
-      res.status(200).json({ totalEarnings });
+      res.status(200).json({ success: true, totalEarnings });
     } else {
       res
-        .status(404)
-        .json({ message: "No earnings found for the specified date." });
+        .status(200)
+        .json({
+          success: true,
+          message: "No earnings found for the specified date.",
+        });
     }
   } catch (error) {
     res.status(500).json({ message: "Error finding total earnings." });
