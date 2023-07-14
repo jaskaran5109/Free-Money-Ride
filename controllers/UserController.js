@@ -386,7 +386,7 @@ exports.sendNotificationsToAll = catchAsyncError(async (req, res) => {
     };
 
     // Get all device tokens from users
-    const deviceTokens = users.map((user) => user.deviceToken);
+    const deviceTokens = users.map((user) => user.deviceToken && user.deviceToken);
 
     // Send the notification to all devices using FCM
     const response = await admin.messaging().send(deviceTokens, payload);
