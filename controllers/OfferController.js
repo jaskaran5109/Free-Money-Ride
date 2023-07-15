@@ -1,5 +1,7 @@
 const Offer = require("../models/Offer");
 const moment = require("moment");
+const UserTransaction = require("../models/UserTransaction");
+
 // Create a new offer
 const createOffer = async (req, res) => {
   try {
@@ -121,6 +123,59 @@ const updateOfferStatus = async (req, res) => {
       .json({ success: false, error: `Error updating offer status: ${error}` });
   }
 };
+
+const getValidAppOffers = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const userTransactionOffers = await UserTransaction.find({
+      userId,
+    }).distinct("offerId");
+    const appOffers = await Offer.find({
+      isEnabled: true,
+      isShopping:false,
+      externalId: { $nin: userTransactionOffers },
+    });
+    if (appOffers.length > 0) {
+      res.status(200).json({ success: true, appOffers });
+    } else {
+      res
+        .status(200)
+        .json({ success: true, message: "No Active App Offers Found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Error retrieving App offers" });
+  }
+};
+
+const getValidShoppingOffers = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const userTransactionOffers = await UserTransaction.find({
+      userId,
+    }).distinct("offerId");
+    const shoppingOffers = await Offer.find({
+      isShopping: true,
+      isEnabled: true,
+      externalId: { $nin: userTransactionOffers },
+    });
+    if (shoppingOffers.length > 0) {
+      res.status(200).json({ success: true, shoppingOffers });
+    } else {
+      res
+        .status(200)
+        .json({ success: true, message: "No Active Shopping Offers Found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Error retrieving shopping offers" });
+  }
+};
+
 module.exports = {
   getAllOffers,
   createOffer,
@@ -128,4 +183,6 @@ module.exports = {
   updateOfferById,
   deleteOfferById,
   updateOfferStatus,
+  getValidAppOffers,
+  getValidShoppingOffers,
 };

@@ -5,6 +5,10 @@ const offerController = require("../controllers/OfferController");
 // Route for getting all offers
 router.get("/admin/offers", offerController.getAllOffers);
 
+router.post("/admin/appoffers", offerController.getValidAppOffers);
+
+router.post("/admin/shoppingoffers", offerController.getValidShoppingOffers);
+
 // Route for creating a new offer
 router.post("/admin/offer", offerController.createOffer);
 
