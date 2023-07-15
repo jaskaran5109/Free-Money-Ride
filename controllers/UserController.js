@@ -4,7 +4,6 @@ const axios = require("axios");
 const crypto = require("crypto");
 const catchAsyncError = require("../middlewares/catchAsyncError");
 const { sendAppToken } = require("../services/sendToken");
-const AppImage =require("../config/appImage.png")
 
 
 exports.register = async (req, res, next) => {
@@ -381,10 +380,10 @@ exports.sendNotifications = async (req, res, next) => {
         body: body,
         image: imageUrl
           ? imageUrl
-          : AppImage,
+          : "https://blog.tryshiftcdn.com/uploads/2021/01/notifications@2x.jpg",
         icon: imageUrl
           ? imageUrl
-          : AppImage,
+          : "https://blog.tryshiftcdn.com/uploads/2021/01/notifications@2x.jpg",
       },
     };
 
