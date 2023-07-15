@@ -2,9 +2,10 @@ const User = require("../models/User");
 const base64 = require("base-64");
 const axios = require("axios");
 const crypto = require("crypto");
-// const { sendEmail } = require("../services/sendEmail");
 const catchAsyncError = require("../middlewares/catchAsyncError");
 const { sendAppToken } = require("../services/sendToken");
+const AppImage =require("../config/appImage.png")
+
 
 exports.register = async (req, res, next) => {
   const { name, email, password, phoneNumber, gender, dateOfBirth } = req.body;
@@ -380,10 +381,10 @@ exports.sendNotifications = async (req, res, next) => {
         body: body,
         image: imageUrl
           ? imageUrl
-          : "https://img.freepik.com/free-vector/push-notifications-concept-illustration_114360-4986.jpg",
+          : AppImage,
         icon: imageUrl
           ? imageUrl
-          : "https://img.freepik.com/free-vector/push-notifications-concept-illustration_114360-4986.jpg",
+          : AppImage,
       },
     };
 
