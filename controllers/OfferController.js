@@ -125,7 +125,7 @@ const updateOfferStatus = async (req, res) => {
 };
 
 const getValidAppOffers = async (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.body;
 
   try {
     const userTransactionOffers = await UserTransaction.find({
@@ -151,7 +151,7 @@ const getValidAppOffers = async (req, res) => {
 };
 
 const getValidShoppingOffers = async (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.body;
 
   try {
     const userTransactionOffers = await UserTransaction.find({
