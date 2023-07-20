@@ -3,7 +3,7 @@ const validator = require("validator");
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -45,15 +45,19 @@ const UserSchema = new mongoose.Schema({
   },
   razorpayContactId: {
     type: String,
+    default: null,
   },
   razorpayFundId: {
     type: String,
+    default: null,
   },
   razorpayPayoutId: {
     type: String,
+    default: null,
   },
   razorpayPayoutStatus: {
     type: String,
+    default: null,
   },
   razorpayStatusDetails: {
     reason: {
@@ -75,7 +79,10 @@ const UserSchema = new mongoose.Schema({
   },
   deviceToken: {
     type: String,
+    default:null,
+    index: true,
     unique: true,
+    sparse: true,
   },
   resetPasswordToken: String,
   resetPasswordExpire: String,
@@ -102,9 +109,9 @@ UserSchema.methods.comparePassword = async function (password) {
 UserSchema.methods.getResetToken = function () {
   const resetToken = crypto.randomBytes(20).toString("hex");
   this.resetPasswordToken = crypto
-  .createHash('sha256')
-  .update(resetToken)
-  .digest('hex');
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
   this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
   return resetToken;
 };
