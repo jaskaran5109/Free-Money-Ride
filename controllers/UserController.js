@@ -4,6 +4,7 @@ const axios = require("axios");
 const crypto = require("crypto");
 const catchAsyncError = require("../middlewares/catchAsyncError");
 const { sendAppToken } = require("../services/sendToken");
+const UserPayout = require("../models/Payout");
 
 
 exports.register = async (req, res, next) => {
@@ -198,8 +199,14 @@ exports.createPayout = catchAsyncError(async (req, res) => {
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
+  const description = `Congratulations! You have successfully withdrawn ₹${amount} from your account.`;
   try {
-    // await user.save();
+    const userPayout = new UserPayout({
+      userId,
+      amount,
+      description,
+    });
+  
 
     const razorpayPayoutId = await axios.post(
       "https://api.razorpay.com/v1/payouts",
@@ -237,6 +244,8 @@ exports.createPayout = catchAsyncError(async (req, res) => {
           razorpayPayoutId.data.status_details.description;
         user.razorpayStatusDetails.source =
           razorpayPayoutId.data.status_details.source;
+          
+        await userPayout.save();
       }
     }
 
